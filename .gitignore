@@ -1,0 +1,5 @@
+client_secrets.json
+.youtube_token.json
+start_bot.command
+__pycache__/
+*.pyc
