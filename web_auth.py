@@ -35,7 +35,7 @@ def auth():
     if not discord_id:
         return "Missing discord_id", 400
     flow = _make_flow()
-    auth_url, _ = flow.authorization_url(access_type="offline", prompt="consent", state=discord_id)
+    auth_url, _ = flow.authorization_url(access_type="offline", prompt="consent", state=discord_id, code_challenge_method=None)
     return redirect(auth_url)
 
 
@@ -45,7 +45,7 @@ def callback():
     flow = _make_flow()
     # Fix scheme when running behind Railway's HTTPS proxy
     auth_response = request.url.replace("http://", "https://", 1)
-    flow.fetch_token(authorization_response=auth_response)
+    flow.fetch_token(authorization_response=auth_response, code_verifier=None)
     save_token(discord_id, json.loads(flow.credentials.to_json()))
     return "<h2>All set! Head back to Discord and try !random</h2>"
 
