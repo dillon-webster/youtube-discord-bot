@@ -115,6 +115,9 @@ async def on_message(message: discord.Message):
     if content == "!subs":
         await message.author.send("Fetching your subscriptions...")
         channels = get_subscriptions(youtube)
+        if not channels:
+            await message.author.send("No subscriptions found. Make sure you signed in with the right Google account.")
+            return
         channels.sort(key=lambda c: c["title"].lower())
 
         lines = [f"`{i + 1:3}.` {ch['title']}" for i, ch in enumerate(channels)]
@@ -137,6 +140,10 @@ async def on_message(message: discord.Message):
 
         channels = get_subscriptions(youtube)
         channels.sort(key=lambda c: c["title"].lower())
+
+        if not channels:
+            await message.author.send("No subscriptions found. Make sure you signed in with the right Google account.")
+            return
 
         if len(parts) == 1:
             channel = random.choice(channels)
