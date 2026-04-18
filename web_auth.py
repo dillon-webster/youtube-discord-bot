@@ -3,7 +3,7 @@ import os
 import threading
 from pathlib import Path
 
-from flask import Flask, redirect, request
+from flask import Flask, redirect, request, session
 from google_auth_oauthlib.flow import Flow
 
 from token_store import save_token
@@ -35,7 +35,8 @@ def auth():
     if not discord_id:
         return "Missing discord_id", 400
     flow = _make_flow()
-    auth_url, _ = flow.authorization_url(access_type="offline", prompt="consent", state=discord_id, code_challenge_method=None)
+    auth_url, _ = flow.authorization_url(access_type="offline", prompt="consent", state=discord_id)
+    session["code_verifier"] = getattr(flow, "code_verifier", None)
     return redirect(auth_url)
 
 
@@ -43,9 +44,12 @@ def auth():
 def callback():
     discord_id = request.args.get("state", "")
     flow = _make_flow()
-    # Fix scheme when running behind Railway's HTTPS proxy
     auth_response = request.url.replace("http://", "https://", 1)
-    flow.fetch_token(authorization_response=auth_response, code_verifier=None)
+    code_verifier = session.pop("code_verifier", None)
+    fetch_kwargs = {"authorization_response": auth_response}
+    if code_verifier:
+        fetch_kwargs["code_verifier"] = code_verifier
+    flow.fetch_token(**fetch_kwargs)
     save_token(discord_id, json.loads(flow.credentials.to_json()))
     return "<h2>All set! Head back to Discord and try !random</h2>"
 
