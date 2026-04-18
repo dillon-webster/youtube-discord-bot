@@ -28,6 +28,7 @@ SCOPES = ["https://www.googleapis.com/auth/youtube.readonly"]
 
 def get_credentials():
     import json
+
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
     from google_auth_oauthlib.flow import InstalledAppFlow
@@ -37,7 +38,8 @@ def get_credentials():
     # Try env var first (used on Railway), then fall back to local file
     token_json = os.environ.get("YOUTUBE_TOKEN")
     if token_json:
-        creds = Credentials.from_authorized_user_info(json.loads(token_json), SCOPES)
+        creds = Credentials.from_authorized_user_info(
+            json.loads(token_json), SCOPES)
     elif TOKEN_FILE.exists():
         creds = Credentials.from_authorized_user_file(str(TOKEN_FILE), SCOPES)
 
@@ -53,11 +55,14 @@ def get_credentials():
                 print("  2. Create a project and enable 'YouTube Data API v3'")
                 print("  3. Create OAuth credentials (Desktop app type)")
                 print("  4. Download the JSON and save as:", SECRETS_FILE)
-                print("  5. Add your Google account as a Test User in OAuth consent screen")
+                print(
+                    "  5. Add your Google account as a Test User in OAuth consent screen"
+                )
                 print("  6. Re-run this script")
                 sys.exit(1)
 
-            flow = InstalledAppFlow.from_client_secrets_file(str(SECRETS_FILE), SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(
+                str(SECRETS_FILE), SCOPES)
             creds = flow.run_local_server(port=0)
 
         if not token_json:
